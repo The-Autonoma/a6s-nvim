@@ -1,13 +1,9 @@
-name: test
+name: CI
 
 on:
   push:
-    branches: [main, staging]
-    paths:
-      - 'tools/extensions/neovim/**'
+    branches: [main]
   pull_request:
-    paths:
-      - 'tools/extensions/neovim/**'
 
 jobs:
   test:
@@ -16,9 +12,6 @@ jobs:
       fail-fast: false
       matrix:
         neovim: [stable, nightly]
-    defaults:
-      run:
-        working-directory: tools/extensions/neovim
     steps:
       - uses: actions/checkout@v4
 
