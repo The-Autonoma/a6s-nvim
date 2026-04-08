@@ -1,0 +1,126 @@
+*autonoma.txt*    Autonoma Code client for Neovim
+
+AUTONOMA                                                            *autonoma*
+
+Neovim client for the Autonoma Code CLI daemon. Connects locally over
+WebSocket (ws://localhost:9876/ws) to invoke AI agents, stream RIGOR phase
+updates, and apply generated artifacts.
+
+==============================================================================
+CONTENTS                                                   *autonoma-contents*
+
+  1. Requirements ......................... |autonoma-requirements|
+  2. Installation ......................... |autonoma-installation|
+  3. Configuration ........................ |autonoma-configuration|
+  4. Commands ............................. |autonoma-commands|
+  5. Keymaps .............................. |autonoma-keymaps|
+  6. Statusline ........................... |autonoma-statusline|
+  7. Events ............................... |autonoma-events|
+  8. Health ............................... |autonoma-health|
+
+==============================================================================
+REQUIREMENTS                                           *autonoma-requirements*
+
+- Neovim >= 0.9
+- Autonoma CLI (`a6s`) running in daemon mode: `a6s code --daemon`
+- plenary.nvim (for tests only)
+- telescope.nvim (optional, for agent/task pickers)
+- nvim-notify (optional, for richer notifications)
+
+==============================================================================
+INSTALLATION                                           *autonoma-installation*
+
+lazy.nvim: >lua
+  {
+    "autonoma/autonoma.nvim",
+    dependencies = { "nvim-telescope/telescope.nvim" },
+    opts = { telemetry_enabled = false },
+  }
+<
+
+packer.nvim: >lua
+  use { "autonoma/autonoma.nvim",
+    requires = { "nvim-telescope/telescope.nvim" },
+    config = function() require("autonoma").setup({ telemetry_enabled = false }) end }
+<
+
+vim-plug: >vim
+  Plug 'nvim-telescope/telescope.nvim'
+  Plug 'autonoma/autonoma.nvim'
+<
+
+rocks.nvim: `:Rocks install autonoma.nvim`
+
+==============================================================================
+CONFIGURATION                                         *autonoma-configuration*
+                                                             *autonoma.setup()*
+>lua
+  require("autonoma").setup({
+    daemon_port = 9876,           -- daemon websocket port
+    daemon_host = "127.0.0.1",
+    auto_connect = true,          -- connect on startup
+    keymaps_enabled = true,       -- register default keymaps
+    keymaps = nil,                -- override defaults
+    telemetry_enabled = false,    -- must be set to silence prompt
+    statusline_enabled = true,
+  })
+<
+
+==============================================================================
+COMMANDS                                                   *autonoma-commands*
+
+:AutonomaConnect            Connect to the daemon.
+:AutonomaDisconnect         Disconnect from the daemon.
+:AutonomaInvoke [agent task]  Invoke an agent (prompts if args omitted).
+:AutonomaExplain            Explain visual selection.
+:AutonomaRefactor [instr]   Refactor visual selection.
+:AutonomaReview [type]      Review visual selection.
+:AutonomaGenerateTests      Generate tests for visual selection.
+:AutonomaTasks              List background tasks (telescope picker).
+:AutonomaCancelTask [id]    Cancel a background task.
+:AutonomaPreview            Preview artifacts from last operation.
+:AutonomaApply              Apply artifacts from last operation.
+:AutonomaInstall            Open daemon install docs.
+
+==============================================================================
+KEYMAPS                                                     *autonoma-keymaps*
+
+Defaults (opt-in via `keymaps_enabled = true`):
+
+  <leader>aa  Invoke agent (normal)
+  <leader>ae  Explain selection (visual)
+  <leader>ar  Refactor selection (visual)
+  <leader>av  Review selection (visual)
+  <leader>at  Generate tests (visual)
+  <leader>al  Task list (normal)
+
+==============================================================================
+STATUSLINE                                               *autonoma-statusline*
+
+Simple component: >lua
+  require("autonoma").statusline_component()
+<
+
+Lualine: >lua
+  require("lualine").setup({
+    sections = { lualine_x = { require("autonoma.statusline").lualine_component() } }
+  })
+<
+
+==============================================================================
+EVENTS                                                       *autonoma-events*
+
+The daemon emits `phase.update`, `task.update`, and `execution.complete`.
+The plugin wires these to the statusline and RIGOR floating window
+automatically. Extra handlers via: >lua
+  require("autonoma.api").on("phase.update", function(data) ... end)
+<
+
+==============================================================================
+HEALTH                                                       *autonoma-health*
+
+`:checkhealth autonoma` verifies Neovim version, plenary, telescope, and
+daemon connectivity.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:

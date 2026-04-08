@@ -1,0 +1,5 @@
+return {
+  include = { "lua/autonoma" },
+  exclude = { "tests", "plenary" },
+  reporter = "default",
+}

@@ -1,0 +1,51 @@
+name: test
+
+on:
+  push:
+    branches: [main, staging]
+    paths:
+      - 'tools/extensions/neovim/**'
+  pull_request:
+    paths:
+      - 'tools/extensions/neovim/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        neovim: [stable, nightly]
+    defaults:
+      run:
+        working-directory: tools/extensions/neovim
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.neovim }}
+
+      - name: Install luarocks
+        run: sudo apt-get update && sudo apt-get install -y luarocks
+
+      - name: Install lua tooling
+        run: |
+          sudo luarocks install luacheck
+          sudo luarocks install luacov
+
+      - name: Install plenary.nvim
+        run: make install
+
+      - name: Lint
+        run: make lint
+        continue-on-error: true
+
+      - name: Test
+        run: make test
+
+      - name: Coverage
+        run: make test-coverage
+        if: matrix.neovim == 'stable'
