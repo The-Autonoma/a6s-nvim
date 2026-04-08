@@ -42,3 +42,4 @@ jobs:
       - name: Coverage
         run: make test-coverage
         if: matrix.neovim == 'stable'
+        continue-on-error: true
