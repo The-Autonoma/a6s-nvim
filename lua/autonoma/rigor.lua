@@ -42,7 +42,7 @@ function M.render()
   if not M.state.buf or not vim.api.nvim_buf_is_valid(M.state.buf) then return end
 
   local lines = {
-    " Autonoma RIGOR Execution",
+    " A6s RIGOR Execution",
     " " .. string.rep("─", 38),
     "",
   }

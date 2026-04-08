@@ -1,8 +1,8 @@
-*autonoma.txt*    Autonoma Code client for Neovim
+*autonoma.txt*    A6s client for Neovim
 
 AUTONOMA                                                            *autonoma*
 
-Neovim client for the Autonoma Code CLI daemon. Connects locally over
+Neovim client for the A6s CLI daemon. Connects locally over
 WebSocket (ws://localhost:9876/ws) to invoke AI agents, stream RIGOR phase
 updates, and apply generated artifacts.
 
@@ -22,7 +22,7 @@ CONTENTS                                                   *autonoma-contents*
 REQUIREMENTS                                           *autonoma-requirements*
 
 - Neovim >= 0.9
-- Autonoma CLI (`a6s`) running in daemon mode: `a6s code --daemon`
+- A6s CLI (`a6s`) running in daemon mode: `a6s code --daemon`
 - plenary.nvim (for tests only)
 - telescope.nvim (optional, for agent/task pickers)
 - nvim-notify (optional, for richer notifications)

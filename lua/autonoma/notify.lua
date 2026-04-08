@@ -5,7 +5,7 @@ local has_notify, notify = pcall(require, "notify")
 
 local function send(msg, level, opts)
   opts = opts or {}
-  opts.title = opts.title or "Autonoma"
+  opts.title = opts.title or "A6s"
   if has_notify then
     notify(msg, level, opts)
   else

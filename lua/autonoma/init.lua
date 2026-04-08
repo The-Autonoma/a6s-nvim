@@ -1,4 +1,4 @@
--- Autonoma Code for Neovim — entry point
+-- A6s for Neovim — entry point
 -- Pure Lua, Neovim 0.9+, connects to local daemon over WebSocket.
 
 local M = {}
@@ -87,7 +87,7 @@ function M.setup(opts)
       vim.defer_fn(function()
         if not api.is_connected() then
           vim.notify(
-            "autonoma.nvim: could not connect to daemon. Run `a6s code --daemon` to start it, or see :AutonomaInstall",
+            "A6s: could not connect to daemon. Run `a6s code --daemon` to start it, or see :AutonomaInstall",
             vim.log.levels.WARN
           )
         end
@@ -110,7 +110,7 @@ function M.check()
   local warn = health.warn or health.report_warn
   local err = health.error or health.report_error
 
-  start("autonoma.nvim")
+  start("A6s for Neovim")
   if vim.fn.has("nvim-0.9") == 1 then
     ok("Neovim 0.9+ detected")
   else

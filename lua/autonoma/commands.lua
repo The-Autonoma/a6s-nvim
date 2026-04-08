@@ -1,4 +1,4 @@
--- User commands for Autonoma
+-- User commands for A6s
 local M = {}
 
 local function get_visual_selection()
@@ -54,12 +54,12 @@ function M.cmd_connect()
     return
   end
   api.connect(function()
-    notify.success("Connected to Autonoma daemon")
+    notify.success("Connected to A6s daemon")
   end)
   -- Offer install hint if it fails
   vim.defer_fn(function()
     if not api.is_connected() then
-      notify.warn("Run `a6s code --daemon` to start the Autonoma daemon, or `:AutonomaInstall`")
+      notify.warn("Run `a6s code --daemon` to start the A6s daemon, or `:AutonomaInstall`")
     end
   end, 6000)
 end
@@ -416,7 +416,7 @@ end
 
 function M.setup()
   local cmd = vim.api.nvim_create_user_command
-  cmd("AutonomaConnect", function() M.cmd_connect() end, { desc = "Connect to Autonoma daemon" })
+  cmd("AutonomaConnect", function() M.cmd_connect() end, { desc = "Connect to A6s daemon" })
   cmd("AutonomaDisconnect", function() M.cmd_disconnect() end, { desc = "Disconnect from daemon" })
   cmd("AutonomaInvoke", function(opts)
     local args = opts.fargs

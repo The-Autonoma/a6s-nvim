@@ -1,4 +1,4 @@
--- Autonoma.nvim plugin loader — minimal entry, defines user commands only.
+-- A6s.nvim plugin loader — minimal entry, defines user commands only.
 if vim.g.loaded_autonoma then return end
 vim.g.loaded_autonoma = 1
 
@@ -13,4 +13,4 @@ vim.api.nvim_create_user_command("AutonomaSetup", function(opts)
     end
   end
   require("autonoma").setup(cfg)
-end, { desc = "Setup Autonoma plugin", nargs = "*" })
+end, { desc = "Setup A6s plugin", nargs = "*" })

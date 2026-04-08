@@ -37,9 +37,9 @@ function M.component()
   local conn = M.state.connected and "●" or "○"
   if M.state.current_phase then
     local icon = phase_icons[M.state.current_phase] or "?"
-    return string.format("Autonoma %s [%s %d%%]", conn, icon, M.state.phase_progress)
+    return string.format("A6s %s [%s %d%%]", conn, icon, M.state.phase_progress)
   end
-  return string.format("Autonoma %s", conn)
+  return string.format("A6s %s", conn)
 end
 
 -- Lualine-style component
