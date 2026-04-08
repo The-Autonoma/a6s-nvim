@@ -243,6 +243,177 @@ function M.cmd_install()
   if opener then pcall(vim.fn.jobstart, { opener, url }, { detach = true }) end
 end
 
+function M.cmd_agents()
+  local api = require("autonoma.api")
+  local notify = require("autonoma.notify")
+
+  if not api.is_connected() then
+    notify.error("Not connected. Run :AutonomaConnect")
+    return
+  end
+
+  api.list_agents(function(result, err)
+    if err then
+      notify.error("agents list failed: " .. tostring(err))
+      return
+    end
+
+    local agents = result and result.agents or result or {}
+    if #agents == 0 then
+      notify.warn("No agents available")
+      return
+    end
+
+    vim.schedule(function()
+      local lines = { "# Agents", "" }
+      for _, agent in ipairs(agents) do
+        local id = agent.id or "?"
+        local name = agent.name or id
+        local desc = agent.description or ""
+        table.insert(lines, string.format("- **%s** (%s): %s", name, id, desc))
+      end
+      show_text_float("Agents", table.concat(lines, "\n"))
+    end)
+  end)
+end
+
+function M.cmd_execution_status(execution_id)
+  local api = require("autonoma.api")
+  local notify = require("autonoma.notify")
+
+  if not api.is_connected() then
+    notify.error("Not connected. Run :AutonomaConnect")
+    return
+  end
+
+  local function do_status(eid)
+    eid = notify.validate_input(eid, "executionId")
+    if not eid then return end
+
+    api.execution_status(eid, function(result, err)
+      if err then
+        notify.error("execution status failed: " .. tostring(err))
+        return
+      end
+      vim.schedule(function()
+        local status = result and result.status or "unknown"
+        local phase = result and result.phase or "unknown"
+        local progress = result and result.progress or 0
+        notify.info(string.format("Execution %s: status=%s phase=%s progress=%d%%",
+          eid, status, phase, progress))
+      end)
+    end)
+  end
+
+  if execution_id and execution_id ~= "" then
+    do_status(execution_id)
+    return
+  end
+
+  vim.ui.input({ prompt = "Execution ID: " }, function(eid)
+    if not eid or eid == "" then return end
+    do_status(eid)
+  end)
+end
+
+function M.cmd_background_launch()
+  local api = require("autonoma.api")
+  local notify = require("autonoma.notify")
+
+  if not api.is_connected() then
+    notify.error("Not connected. Run :AutonomaConnect")
+    return
+  end
+
+  api.list_agents(function(result, err)
+    if err then
+      notify.error("agents list failed: " .. tostring(err))
+      return
+    end
+
+    local agents = result and result.agents or result or {}
+    if #agents == 0 then
+      notify.warn("No agents available")
+      return
+    end
+
+    vim.schedule(function()
+      local display_items = {}
+      for _, agent in ipairs(agents) do
+        table.insert(display_items, (agent.name or agent.id or "?") .. " (" .. (agent.id or "?") .. ")")
+      end
+
+      vim.ui.select(display_items, { prompt = "Select agent:" }, function(_, idx)
+        if not idx then return end
+        local agent = agents[idx]
+        local agent_type = agent.id or agent.name
+
+        vim.ui.input({ prompt = "Task: " }, function(task)
+          task = notify.validate_input(task, "task")
+          if not task then return end
+
+          api.launch_background_task(task, agent_type, function(launch_result, launch_err)
+            if launch_err then
+              notify.error("launch failed: " .. tostring(launch_err))
+              return
+            end
+            local task_id = launch_result and (launch_result.taskId or launch_result.task_id)
+            if task_id then
+              notify.info("Background task started: " .. task_id)
+            else
+              notify.info("Background task launched")
+            end
+          end)
+        end)
+      end)
+    end)
+  end)
+end
+
+function M.cmd_background_output(task_id)
+  local api = require("autonoma.api")
+  local notify = require("autonoma.notify")
+
+  if not api.is_connected() then
+    notify.error("Not connected. Run :AutonomaConnect")
+    return
+  end
+
+  local function do_output(tid)
+    tid = notify.validate_input(tid, "taskId")
+    if not tid then return end
+
+    api.get_task_output(tid, function(result, err)
+      if err then
+        notify.error("output failed: " .. tostring(err))
+        return
+      end
+      vim.schedule(function()
+        local output = result and (result.output or result.content or vim.inspect(result)) or "No output"
+        local buf = vim.api.nvim_create_buf(false, true)
+        vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
+        vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
+        vim.api.nvim_buf_set_option(buf, "swapfile", false)
+        local lines = vim.split(tostring(output), "\n")
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+        vim.api.nvim_buf_set_name(buf, "autonoma://task/" .. tid)
+        vim.cmd("split")
+        vim.api.nvim_win_set_buf(0, buf)
+      end)
+    end)
+  end
+
+  if task_id and task_id ~= "" then
+    do_output(task_id)
+    return
+  end
+
+  vim.ui.input({ prompt = "Task ID: " }, function(tid)
+    if not tid or tid == "" then return end
+    do_output(tid)
+  end)
+end
+
 function M.setup()
   local cmd = vim.api.nvim_create_user_command
   cmd("AutonomaConnect", function() M.cmd_connect() end, { desc = "Connect to Autonoma daemon" })
@@ -264,6 +435,12 @@ function M.setup()
   cmd("AutonomaPreview", function() M.cmd_preview() end, { desc = "Preview last artifacts" })
   cmd("AutonomaApply", function() M.cmd_apply() end, { desc = "Apply last artifacts" })
   cmd("AutonomaInstall", function() M.cmd_install() end, { desc = "Open daemon install docs" })
+  cmd("AutonomaAgents", function() M.cmd_agents() end, { desc = "List available agents" })
+  cmd("AutonomaStatus", function(opts) M.cmd_execution_status(opts.args ~= "" and opts.args or nil) end,
+    { desc = "Show execution status", nargs = "?" })
+  cmd("AutonomaLaunch", function() M.cmd_background_launch() end, { desc = "Launch background task" })
+  cmd("AutonomaOutput", function(opts) M.cmd_background_output(opts.args ~= "" and opts.args or nil) end,
+    { desc = "Show background task output", nargs = "?" })
 end
 
 -- Expose helpers for testing

@@ -15,6 +15,7 @@ describe("autonoma.commands", function()
       "AutonomaExplain", "AutonomaRefactor", "AutonomaReview",
       "AutonomaGenerateTests", "AutonomaTasks", "AutonomaCancelTask",
       "AutonomaPreview", "AutonomaApply", "AutonomaInstall",
+      "AutonomaAgents", "AutonomaStatus", "AutonomaLaunch", "AutonomaOutput",
     }
     local cmds = vim.api.nvim_get_commands({})
     for _, name in ipairs(expected) do
@@ -66,5 +67,21 @@ describe("autonoma.commands", function()
 
   it("cmd_install does not error", function()
     assert.has_no.errors(function() commands.cmd_install() end)
+  end)
+
+  it("cmd_agents errors when not connected", function()
+    assert.has_no.errors(function() commands.cmd_agents() end)
+  end)
+
+  it("cmd_execution_status errors when not connected", function()
+    assert.has_no.errors(function() commands.cmd_execution_status("exec-123") end)
+  end)
+
+  it("cmd_background_launch errors when not connected", function()
+    assert.has_no.errors(function() commands.cmd_background_launch() end)
+  end)
+
+  it("cmd_background_output errors when not connected", function()
+    assert.has_no.errors(function() commands.cmd_background_output("task-123") end)
   end)
 end)
