@@ -91,7 +91,7 @@ require("lualine").setup({
 
 ## Protocol
 
-See `/tools/cli/docs/DAEMON-PROTOCOL.md`. All 13 methods are implemented:
+Full spec and daemon bootstrap guide: <https://www.theautonoma.io/docs/build/cli/daemon>. All 13 methods are implemented:
 `agents.list`, `agents.invoke`, `execution.status`, `background.{list,launch,cancel,output}`, `artifacts.{preview,apply}`, `code.{explain,refactor,generateTests,review}`.
 
 ## Development
