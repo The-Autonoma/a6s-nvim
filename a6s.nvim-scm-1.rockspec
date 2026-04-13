@@ -3,7 +3,7 @@ package = "a6s.nvim"
 version = "scm-1"
 
 source = {
-  url = "git+https://github.com/autonoma/a6s.nvim.git",
+  url = "git+https://github.com/The-Autonoma/a6s-nvim.git",
 }
 
 description = {
@@ -14,7 +14,7 @@ description = {
     commands to invoke agents, stream RIGOR phase updates, review/apply
     artifacts, and manage background tasks. Pure Lua, Neovim 0.9+.
   ]],
-  homepage = "https://github.com/autonoma/a6s.nvim",
+  homepage = "https://github.com/The-Autonoma/a6s-nvim",
   license = "MIT",
   labels = { "neovim", "ai", "a6s", "websocket" },
 }
