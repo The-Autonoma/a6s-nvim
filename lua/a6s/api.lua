@@ -1,5 +1,5 @@
--- Autonoma WebSocket client for Neovim
--- Connects to the local Autonoma CLI daemon at ws://localhost:{port}/ws
+-- A6s WebSocket client for Neovim
+-- Connects to the local A6s CLI daemon at ws://localhost:{port}/ws
 -- Pure Lua (libuv/vim.loop) implementation — no external deps beyond plenary.
 
 local uv = vim.loop
@@ -42,9 +42,9 @@ local state = {
 -- ============================================================================
 
 local function log_debug(msg)
-  if vim.g.autonoma_debug then
+  if vim.g.a6s_debug then
     vim.schedule(function()
-      vim.notify("[autonoma] " .. msg, vim.log.levels.DEBUG)
+      vim.notify("[a6s] " .. msg, vim.log.levels.DEBUG)
     end)
   end
 end

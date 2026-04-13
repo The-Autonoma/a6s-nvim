@@ -58,7 +58,7 @@ end
 function M.setup(opts)
   opts = opts or {}
   -- Create autocmd user event for external redraws
-  vim.api.nvim_create_augroup("AutonomaStatusline", { clear = true })
+  vim.api.nvim_create_augroup("A6sStatusline", { clear = true })
 end
 
 return M

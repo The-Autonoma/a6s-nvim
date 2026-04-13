@@ -76,7 +76,7 @@ function M.open(execution_id)
   local buf = vim.api.nvim_create_buf(false, true)
   M.state.buf = buf
   vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
-  vim.api.nvim_buf_set_option(buf, "filetype", "autonoma-rigor")
+  vim.api.nvim_buf_set_option(buf, "filetype", "a6s-rigor")
 
   local width = 44
   local height = 12

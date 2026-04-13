@@ -1,22 +1,22 @@
 rockspec_format = "3.0"
-package = "autonoma.nvim"
+package = "a6s.nvim"
 version = "scm-1"
 
 source = {
-  url = "git+https://github.com/autonoma/autonoma.nvim.git",
+  url = "git+https://github.com/autonoma/a6s.nvim.git",
 }
 
 description = {
-  summary = "Neovim client for the Autonoma Code daemon",
+  summary = "Neovim client for the A6s Code daemon",
   detailed = [[
-    Official Neovim integration for Autonoma Code. Connects to the local
-    Autonoma CLI daemon over WebSocket (ws://localhost:9876/ws) and provides
+    Official Neovim integration for A6s Code. Connects to the local
+    A6s CLI daemon over WebSocket (ws://localhost:9876/ws) and provides
     commands to invoke agents, stream RIGOR phase updates, review/apply
     artifacts, and manage background tasks. Pure Lua, Neovim 0.9+.
   ]],
-  homepage = "https://github.com/autonoma/autonoma.nvim",
+  homepage = "https://github.com/autonoma/a6s.nvim",
   license = "MIT",
-  labels = { "neovim", "ai", "autonoma", "websocket" },
+  labels = { "neovim", "ai", "a6s", "websocket" },
 }
 
 dependencies = {

@@ -16,7 +16,7 @@ function M.agents_picker(on_select)
   local conf = require("telescope.config").values
   local actions = require("telescope.actions")
   local action_state = require("telescope.actions.state")
-  local api = require("autonoma.api")
+  local api = require("a6s.api")
 
   api.list_agents(function(agents, err)
     if err then
@@ -25,7 +25,7 @@ function M.agents_picker(on_select)
     end
     vim.schedule(function()
       pickers.new({}, {
-        prompt_title = "Autonoma Agents",
+        prompt_title = "A6s Agents",
         finder = finders.new_table({
           results = agents or {},
           entry_maker = function(a)
@@ -60,7 +60,7 @@ function M.tasks_picker(on_select)
   local conf = require("telescope.config").values
   local actions = require("telescope.actions")
   local action_state = require("telescope.actions.state")
-  local api = require("autonoma.api")
+  local api = require("a6s.api")
 
   api.list_background_tasks(function(tasks, err)
     if err then
@@ -69,7 +69,7 @@ function M.tasks_picker(on_select)
     end
     vim.schedule(function()
       pickers.new({}, {
-        prompt_title = "Autonoma Background Tasks",
+        prompt_title = "A6s Background Tasks",
         finder = finders.new_table({
           results = tasks or {},
           entry_maker = function(t)

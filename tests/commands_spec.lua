@@ -1,8 +1,8 @@
 -- Tests for commands dispatch and input validation
-describe("autonoma.commands", function()
-  local commands = require("autonoma.commands")
-  local notify = require("autonoma.notify")
-  local api = require("autonoma.api")
+describe("a6s.commands", function()
+  local commands = require("a6s.commands")
+  local notify = require("a6s.notify")
+  local api = require("a6s.api")
 
   before_each(function()
     api.reset_state()
@@ -11,11 +11,11 @@ describe("autonoma.commands", function()
   it("registers all user commands on setup()", function()
     commands.setup()
     local expected = {
-      "AutonomaConnect", "AutonomaDisconnect", "AutonomaInvoke",
-      "AutonomaExplain", "AutonomaRefactor", "AutonomaReview",
-      "AutonomaGenerateTests", "AutonomaTasks", "AutonomaCancelTask",
-      "AutonomaPreview", "AutonomaApply", "AutonomaInstall",
-      "AutonomaAgents", "AutonomaStatus", "AutonomaLaunch", "AutonomaOutput",
+      "A6sConnect", "A6sDisconnect", "A6sInvoke",
+      "A6sExplain", "A6sRefactor", "A6sReview",
+      "A6sGenerateTests", "A6sTasks", "A6sCancelTask",
+      "A6sPreview", "A6sApply", "A6sInstall",
+      "A6sAgents", "A6sStatus", "A6sLaunch", "A6sOutput",
     }
     local cmds = vim.api.nvim_get_commands({})
     for _, name in ipairs(expected) do
@@ -52,12 +52,12 @@ describe("autonoma.commands", function()
   end)
 
   it("cmd_preview warns when no artifacts", function()
-    require("autonoma").state.last_artifacts = nil
+    require("a6s").state.last_artifacts = nil
     assert.has_no.errors(function() commands.cmd_preview() end)
   end)
 
   it("cmd_apply warns when no artifacts", function()
-    require("autonoma").state.last_artifacts = {}
+    require("a6s").state.last_artifacts = {}
     assert.has_no.errors(function() commands.cmd_apply() end)
   end)
 

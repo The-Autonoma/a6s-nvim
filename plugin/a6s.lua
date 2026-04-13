@@ -1,9 +1,9 @@
 -- A6s.nvim plugin loader — minimal entry, defines user commands only.
-if vim.g.loaded_autonoma then return end
-vim.g.loaded_autonoma = 1
+if vim.g.loaded_a6s then return end
+vim.g.loaded_a6s = 1
 
--- Provide :AutonomaSetup as lightweight entry for lazy loading
-vim.api.nvim_create_user_command("AutonomaSetup", function(opts)
+-- Provide :A6sSetup as lightweight entry for lazy loading
+vim.api.nvim_create_user_command("A6sSetup", function(opts)
   local cfg = {}
   if opts.args ~= "" then
     local ok, fn = pcall(loadstring, "return " .. opts.args)
@@ -12,5 +12,5 @@ vim.api.nvim_create_user_command("AutonomaSetup", function(opts)
       if ok2 and type(parsed) == "table" then cfg = parsed end
     end
   end
-  require("autonoma").setup(cfg)
+  require("a6s").setup(cfg)
 end, { desc = "Setup A6s plugin", nargs = "*" })

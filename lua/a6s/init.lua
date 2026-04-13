@@ -19,9 +19,9 @@ M.state = {
 }
 
 local function wire_events()
-  local api = require("autonoma.api")
-  local statusline = require("autonoma.statusline")
-  local rigor = require("autonoma.rigor")
+  local api = require("a6s.api")
+  local statusline = require("a6s.statusline")
+  local rigor = require("a6s.rigor")
 
   api.on("connected", function()
     statusline.set_connected(true)
@@ -47,25 +47,25 @@ function M.setup(opts)
   M.config = vim.tbl_extend("force", M.config, opts or {})
 
   if vim.fn.has("nvim-0.9") == 0 then
-    vim.notify("autonoma.nvim requires Neovim 0.9+", vim.log.levels.ERROR)
+    vim.notify("a6s.nvim requires Neovim 0.9+", vim.log.levels.ERROR)
     return
   end
 
-  local api = require("autonoma.api")
+  local api = require("a6s.api")
   api.setup({
     port = M.config.daemon_port,
     host = M.config.daemon_host,
   })
 
-  require("autonoma.commands").setup()
-  require("autonoma.autocmds").setup()
+  require("a6s.commands").setup()
+  require("a6s.autocmds").setup()
 
   if M.config.statusline_enabled then
-    require("autonoma.statusline").setup({})
+    require("a6s.statusline").setup({})
   end
 
   if M.config.keymaps_enabled then
-    require("autonoma.keymaps").setup({
+    require("a6s.keymaps").setup({
       enabled = true,
       keys = M.config.keymaps,
     })
@@ -76,7 +76,7 @@ function M.setup(opts)
   -- Telemetry opt-in prompt (one-line, first setup only)
   if M.config.telemetry_enabled == nil and not M.state.initialized then
     vim.notify(
-      "autonoma.nvim: set `telemetry_enabled = true|false` in setup() to silence this notice.",
+      "a6s.nvim: set `telemetry_enabled = true|false` in setup() to silence this notice.",
       vim.log.levels.INFO
     )
   end
@@ -87,7 +87,7 @@ function M.setup(opts)
       vim.defer_fn(function()
         if not api.is_connected() then
           vim.notify(
-            "A6s: could not connect to daemon. Run `a6s code --daemon` to start it, or see :AutonomaInstall",
+            "A6s: could not connect to daemon. Run `a6s code --daemon` to start it, or see :A6sInstall",
             vim.log.levels.WARN
           )
         end
@@ -99,10 +99,10 @@ function M.setup(opts)
 end
 
 -- Public API helpers
-function M.is_connected() return require("autonoma.api").is_connected() end
-function M.statusline_component() return require("autonoma.statusline").component() end
+function M.is_connected() return require("a6s.api").is_connected() end
+function M.statusline_component() return require("a6s.statusline").component() end
 
--- :checkhealth autonoma stub
+-- :checkhealth a6s stub
 function M.check()
   local health = vim.health or require("health")
   local start = health.start or health.report_start
@@ -123,11 +123,11 @@ function M.check()
   local has_telescope = pcall(require, "telescope")
   if has_telescope then ok("telescope.nvim found") else warn("telescope.nvim not found (optional)") end
 
-  local api = require("autonoma.api")
+  local api = require("a6s.api")
   if api.is_connected() then
     ok("connected to daemon on port " .. api.config.port)
   else
-    warn("not connected — run :AutonomaConnect or `a6s code --daemon`")
+    warn("not connected — run :A6sConnect or `a6s code --daemon`")
   end
 end
 

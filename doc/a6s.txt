@@ -1,0 +1,126 @@
+*a6s.txt*    A6s client for Neovim
+
+A6S                                                            *a6s*
+
+Neovim client for the A6s CLI daemon. Connects locally over
+WebSocket (ws://localhost:9876/ws) to invoke AI agents, stream RIGOR phase
+updates, and apply generated artifacts.
+
+==============================================================================
+CONTENTS                                                   *a6s-contents*
+
+  1. Requirements ......................... |a6s-requirements|
+  2. Installation ......................... |a6s-installation|
+  3. Configuration ........................ |a6s-configuration|
+  4. Commands ............................. |a6s-commands|
+  5. Keymaps .............................. |a6s-keymaps|
+  6. Statusline ........................... |a6s-statusline|
+  7. Events ............................... |a6s-events|
+  8. Health ............................... |a6s-health|
+
+==============================================================================
+REQUIREMENTS                                           *a6s-requirements*
+
+- Neovim >= 0.9
+- A6s CLI (`a6s`) running in daemon mode: `a6s code --daemon`
+- plenary.nvim (for tests only)
+- telescope.nvim (optional, for agent/task pickers)
+- nvim-notify (optional, for richer notifications)
+
+==============================================================================
+INSTALLATION                                           *a6s-installation*
+
+lazy.nvim: >lua
+  {
+    "autonoma/a6s.nvim",
+    dependencies = { "nvim-telescope/telescope.nvim" },
+    opts = { telemetry_enabled = false },
+  }
+<
+
+packer.nvim: >lua
+  use { "autonoma/a6s.nvim",
+    requires = { "nvim-telescope/telescope.nvim" },
+    config = function() require("a6s").setup({ telemetry_enabled = false }) end }
+<
+
+vim-plug: >vim
+  Plug 'nvim-telescope/telescope.nvim'
+  Plug 'autonoma/a6s.nvim'
+<
+
+rocks.nvim: `:Rocks install a6s.nvim`
+
+==============================================================================
+CONFIGURATION                                         *a6s-configuration*
+                                                             *a6s.setup()*
+>lua
+  require("a6s").setup({
+    daemon_port = 9876,           -- daemon websocket port
+    daemon_host = "127.0.0.1",
+    auto_connect = true,          -- connect on startup
+    keymaps_enabled = true,       -- register default keymaps
+    keymaps = nil,                -- override defaults
+    telemetry_enabled = false,    -- must be set to silence prompt
+    statusline_enabled = true,
+  })
+<
+
+==============================================================================
+COMMANDS                                                   *a6s-commands*
+
+:A6sConnect            Connect to the daemon.
+:A6sDisconnect         Disconnect from the daemon.
+:A6sInvoke [agent task]  Invoke an agent (prompts if args omitted).
+:A6sExplain            Explain visual selection.
+:A6sRefactor [instr]   Refactor visual selection.
+:A6sReview [type]      Review visual selection.
+:A6sGenerateTests      Generate tests for visual selection.
+:A6sTasks              List background tasks (telescope picker).
+:A6sCancelTask [id]    Cancel a background task.
+:A6sPreview            Preview artifacts from last operation.
+:A6sApply              Apply artifacts from last operation.
+:A6sInstall            Open daemon install docs.
+
+==============================================================================
+KEYMAPS                                                     *a6s-keymaps*
+
+Defaults (opt-in via `keymaps_enabled = true`):
+
+  <leader>aa  Invoke agent (normal)
+  <leader>ae  Explain selection (visual)
+  <leader>ar  Refactor selection (visual)
+  <leader>av  Review selection (visual)
+  <leader>at  Generate tests (visual)
+  <leader>al  Task list (normal)
+
+==============================================================================
+STATUSLINE                                               *a6s-statusline*
+
+Simple component: >lua
+  require("a6s").statusline_component()
+<
+
+Lualine: >lua
+  require("lualine").setup({
+    sections = { lualine_x = { require("a6s.statusline").lualine_component() } }
+  })
+<
+
+==============================================================================
+EVENTS                                                       *a6s-events*
+
+The daemon emits `phase.update`, `task.update`, and `execution.complete`.
+The plugin wires these to the statusline and RIGOR floating window
+automatically. Extra handlers via: >lua
+  require("a6s.api").on("phase.update", function(data) ... end)
+<
+
+==============================================================================
+HEALTH                                                       *a6s-health*
+
+`:checkhealth a6s` verifies Neovim version, plenary, telescope, and
+daemon connectivity.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:

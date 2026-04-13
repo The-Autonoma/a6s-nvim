@@ -47,8 +47,8 @@ local function show_text_float(title, text)
 end
 
 function M.cmd_connect()
-  local api = require("autonoma.api")
-  local notify = require("autonoma.notify")
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
   if api.is_connected() then
     notify.info("Already connected")
     return
@@ -59,23 +59,23 @@ function M.cmd_connect()
   -- Offer install hint if it fails
   vim.defer_fn(function()
     if not api.is_connected() then
-      notify.warn("Run `a6s code --daemon` to start the A6s daemon, or `:AutonomaInstall`")
+      notify.warn("Run `a6s code --daemon` to start the A6s daemon, or `:A6sInstall`")
     end
   end, 6000)
 end
 
 function M.cmd_disconnect()
-  require("autonoma.api").disconnect()
-  require("autonoma.notify").info("Disconnected")
+  require("a6s.api").disconnect()
+  require("a6s.notify").info("Disconnected")
 end
 
 function M.cmd_invoke(agent_type, task)
-  local api = require("autonoma.api")
-  local notify = require("autonoma.notify")
-  local rigor = require("autonoma.rigor")
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
+  local rigor = require("a6s.rigor")
 
   if not api.is_connected() then
-    notify.error("Not connected. Run :AutonomaConnect")
+    notify.error("Not connected. Run :A6sConnect")
     return
   end
 
@@ -113,10 +113,10 @@ function M.cmd_invoke(agent_type, task)
 end
 
 local function code_op(method_name, extra)
-  local api = require("autonoma.api")
-  local notify = require("autonoma.notify")
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
   if not api.is_connected() then
-    notify.error("Not connected. Run :AutonomaConnect")
+    notify.error("Not connected. Run :A6sConnect")
     return
   end
   local code = get_visual_selection()
@@ -134,17 +134,17 @@ local function code_op(method_name, extra)
       if err then notify.error("refactor failed: " .. tostring(err)); return end
       vim.schedule(function()
         show_text_float("Refactor Artifacts",
-          "Received " .. tostring(#(result or {})) .. " artifacts. Use :AutonomaPreview/:AutonomaApply")
-        require("autonoma").state.last_artifacts = result
+          "Received " .. tostring(#(result or {})) .. " artifacts. Use :A6sPreview/:A6sApply")
+        require("a6s").state.last_artifacts = result
       end)
     end)
   elseif method_name == "tests" then
     api.generate_tests(code, info.language, info.file_path, function(result, err)
       if err then notify.error("tests failed: " .. tostring(err)); return end
-      require("autonoma").state.last_artifacts = result
+      require("a6s").state.last_artifacts = result
       vim.schedule(function()
         show_text_float("Generated Tests",
-          "Received " .. tostring(#(result or {})) .. " artifacts. Use :AutonomaPreview/:AutonomaApply")
+          "Received " .. tostring(#(result or {})) .. " artifacts. Use :A6sPreview/:A6sApply")
       end)
     end)
   elseif method_name == "review" then
@@ -168,15 +168,15 @@ function M.cmd_review(review_type) code_op("review", review_type) end
 function M.cmd_generate_tests() code_op("tests") end
 
 function M.cmd_tasks()
-  local telescope = require("autonoma.telescope")
+  local telescope = require("a6s.telescope")
   telescope.tasks_picker(function(t)
     vim.notify("Selected task: " .. (t.id or "?"), vim.log.levels.INFO)
   end)
 end
 
 function M.cmd_cancel_task(task_id)
-  local api = require("autonoma.api")
-  local notify = require("autonoma.notify")
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
   if not task_id or task_id == "" then
     vim.ui.input({ prompt = "Task ID: " }, function(tid)
       if not tid or tid == "" then return end
@@ -191,9 +191,9 @@ function M.cmd_cancel_task(task_id)
 end
 
 function M.cmd_preview()
-  local api = require("autonoma.api")
-  local notify = require("autonoma.notify")
-  local artifacts = require("autonoma").state.last_artifacts
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
+  local artifacts = require("a6s").state.last_artifacts
   if not artifacts or #artifacts == 0 then
     notify.warn("No artifacts to preview")
     return
@@ -216,9 +216,9 @@ function M.cmd_preview()
 end
 
 function M.cmd_apply()
-  local api = require("autonoma.api")
-  local notify = require("autonoma.notify")
-  local artifacts = require("autonoma").state.last_artifacts
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
+  local artifacts = require("a6s").state.last_artifacts
   if not artifacts or #artifacts == 0 then
     notify.warn("No artifacts to apply")
     return
@@ -244,11 +244,11 @@ function M.cmd_install()
 end
 
 function M.cmd_agents()
-  local api = require("autonoma.api")
-  local notify = require("autonoma.notify")
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
 
   if not api.is_connected() then
-    notify.error("Not connected. Run :AutonomaConnect")
+    notify.error("Not connected. Run :A6sConnect")
     return
   end
 
@@ -278,11 +278,11 @@ function M.cmd_agents()
 end
 
 function M.cmd_execution_status(execution_id)
-  local api = require("autonoma.api")
-  local notify = require("autonoma.notify")
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
 
   if not api.is_connected() then
-    notify.error("Not connected. Run :AutonomaConnect")
+    notify.error("Not connected. Run :A6sConnect")
     return
   end
 
@@ -317,11 +317,11 @@ function M.cmd_execution_status(execution_id)
 end
 
 function M.cmd_background_launch()
-  local api = require("autonoma.api")
-  local notify = require("autonoma.notify")
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
 
   if not api.is_connected() then
-    notify.error("Not connected. Run :AutonomaConnect")
+    notify.error("Not connected. Run :A6sConnect")
     return
   end
 
@@ -371,11 +371,11 @@ function M.cmd_background_launch()
 end
 
 function M.cmd_background_output(task_id)
-  local api = require("autonoma.api")
-  local notify = require("autonoma.notify")
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
 
   if not api.is_connected() then
-    notify.error("Not connected. Run :AutonomaConnect")
+    notify.error("Not connected. Run :A6sConnect")
     return
   end
 
@@ -396,7 +396,7 @@ function M.cmd_background_output(task_id)
         vim.api.nvim_buf_set_option(buf, "swapfile", false)
         local lines = vim.split(tostring(output), "\n")
         vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-        vim.api.nvim_buf_set_name(buf, "autonoma://task/" .. tid)
+        vim.api.nvim_buf_set_name(buf, "a6s://task/" .. tid)
         vim.cmd("split")
         vim.api.nvim_win_set_buf(0, buf)
       end)
@@ -416,30 +416,30 @@ end
 
 function M.setup()
   local cmd = vim.api.nvim_create_user_command
-  cmd("AutonomaConnect", function() M.cmd_connect() end, { desc = "Connect to A6s daemon" })
-  cmd("AutonomaDisconnect", function() M.cmd_disconnect() end, { desc = "Disconnect from daemon" })
-  cmd("AutonomaInvoke", function(opts)
+  cmd("A6sConnect", function() M.cmd_connect() end, { desc = "Connect to A6s daemon" })
+  cmd("A6sDisconnect", function() M.cmd_disconnect() end, { desc = "Disconnect from daemon" })
+  cmd("A6sInvoke", function(opts)
     local args = opts.fargs
     M.cmd_invoke(args[1], args[2] and table.concat(vim.list_slice(args, 2), " "))
   end, { desc = "Invoke an agent", nargs = "*" })
-  cmd("AutonomaExplain", function() M.cmd_explain() end, { desc = "Explain selection", range = true })
-  cmd("AutonomaRefactor", function(opts) M.cmd_refactor(opts.args ~= "" and opts.args or nil) end,
+  cmd("A6sExplain", function() M.cmd_explain() end, { desc = "Explain selection", range = true })
+  cmd("A6sRefactor", function(opts) M.cmd_refactor(opts.args ~= "" and opts.args or nil) end,
     { desc = "Refactor selection", range = true, nargs = "*" })
-  cmd("AutonomaReview", function(opts) M.cmd_review(opts.args ~= "" and opts.args or nil) end,
+  cmd("A6sReview", function(opts) M.cmd_review(opts.args ~= "" and opts.args or nil) end,
     { desc = "Review selection", range = true, nargs = "?" })
-  cmd("AutonomaGenerateTests", function() M.cmd_generate_tests() end,
+  cmd("A6sGenerateTests", function() M.cmd_generate_tests() end,
     { desc = "Generate tests for selection", range = true })
-  cmd("AutonomaTasks", function() M.cmd_tasks() end, { desc = "List background tasks" })
-  cmd("AutonomaCancelTask", function(opts) M.cmd_cancel_task(opts.args) end,
+  cmd("A6sTasks", function() M.cmd_tasks() end, { desc = "List background tasks" })
+  cmd("A6sCancelTask", function(opts) M.cmd_cancel_task(opts.args) end,
     { desc = "Cancel a background task", nargs = "?" })
-  cmd("AutonomaPreview", function() M.cmd_preview() end, { desc = "Preview last artifacts" })
-  cmd("AutonomaApply", function() M.cmd_apply() end, { desc = "Apply last artifacts" })
-  cmd("AutonomaInstall", function() M.cmd_install() end, { desc = "Open daemon install docs" })
-  cmd("AutonomaAgents", function() M.cmd_agents() end, { desc = "List available agents" })
-  cmd("AutonomaStatus", function(opts) M.cmd_execution_status(opts.args ~= "" and opts.args or nil) end,
+  cmd("A6sPreview", function() M.cmd_preview() end, { desc = "Preview last artifacts" })
+  cmd("A6sApply", function() M.cmd_apply() end, { desc = "Apply last artifacts" })
+  cmd("A6sInstall", function() M.cmd_install() end, { desc = "Open daemon install docs" })
+  cmd("A6sAgents", function() M.cmd_agents() end, { desc = "List available agents" })
+  cmd("A6sStatus", function(opts) M.cmd_execution_status(opts.args ~= "" and opts.args or nil) end,
     { desc = "Show execution status", nargs = "?" })
-  cmd("AutonomaLaunch", function() M.cmd_background_launch() end, { desc = "Launch background task" })
-  cmd("AutonomaOutput", function(opts) M.cmd_background_output(opts.args ~= "" and opts.args or nil) end,
+  cmd("A6sLaunch", function() M.cmd_background_launch() end, { desc = "Launch background task" })
+  cmd("A6sOutput", function(opts) M.cmd_background_output(opts.args ~= "" and opts.args or nil) end,
     { desc = "Show background task output", nargs = "?" })
 end
 

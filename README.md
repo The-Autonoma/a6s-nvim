@@ -1,4 +1,4 @@
-# autonoma.nvim
+# a6s.nvim
 
 Official Neovim client for **A6s** -- Intelligent Multi-Agent Orchestration. Connects to the local A6s CLI daemon over WebSocket (`ws://localhost:9876/ws`) and provides commands to invoke AI agents, stream RIGOR phase updates, review/apply generated artifacts, and manage background tasks.
 
@@ -17,7 +17,7 @@ Official Neovim client for **A6s** -- Intelligent Multi-Agent Orchestration. Con
 **lazy.nvim**
 ```lua
 {
-  "autonoma/autonoma.nvim",
+  "autonoma/a6s.nvim",
   dependencies = { "nvim-telescope/telescope.nvim" },
   opts = { telemetry_enabled = false },
 }
@@ -26,25 +26,25 @@ Official Neovim client for **A6s** -- Intelligent Multi-Agent Orchestration. Con
 **packer.nvim**
 ```lua
 use {
-  "autonoma/autonoma.nvim",
+  "autonoma/a6s.nvim",
   requires = { "nvim-telescope/telescope.nvim" },
-  config = function() require("autonoma").setup({ telemetry_enabled = false }) end,
+  config = function() require("a6s").setup({ telemetry_enabled = false }) end,
 }
 ```
 
 **vim-plug**
 ```vim
 Plug 'nvim-telescope/telescope.nvim'
-Plug 'autonoma/autonoma.nvim'
-lua require('autonoma').setup({ telemetry_enabled = false })
+Plug 'autonoma/a6s.nvim'
+lua require('a6s').setup({ telemetry_enabled = false })
 ```
 
-**rocks.nvim** — `:Rocks install autonoma.nvim`
+**rocks.nvim** — `:Rocks install a6s.nvim`
 
 ## Configuration
 
 ```lua
-require("autonoma").setup({
+require("a6s").setup({
   daemon_port = 9876,
   daemon_host = "127.0.0.1",
   auto_connect = true,
@@ -58,17 +58,17 @@ require("autonoma").setup({
 
 | Command | Description |
 |---------|-------------|
-| `:AutonomaConnect` | Connect to daemon |
-| `:AutonomaDisconnect` | Disconnect |
-| `:AutonomaInvoke [agent task]` | Invoke an agent |
-| `:AutonomaExplain` | Explain visual selection |
-| `:AutonomaRefactor [instr]` | Refactor visual selection |
-| `:AutonomaReview [type]` | Review visual selection (security/performance/quality/all) |
-| `:AutonomaGenerateTests` | Generate tests for selection |
-| `:AutonomaTasks` | List background tasks |
-| `:AutonomaCancelTask [id]` | Cancel a task |
-| `:AutonomaPreview` | Preview last artifacts (diff) |
-| `:AutonomaApply` | Apply last artifacts |
+| `:A6sConnect` | Connect to daemon |
+| `:A6sDisconnect` | Disconnect |
+| `:A6sInvoke [agent task]` | Invoke an agent |
+| `:A6sExplain` | Explain visual selection |
+| `:A6sRefactor [instr]` | Refactor visual selection |
+| `:A6sReview [type]` | Review visual selection (security/performance/quality/all) |
+| `:A6sGenerateTests` | Generate tests for selection |
+| `:A6sTasks` | List background tasks |
+| `:A6sCancelTask [id]` | Cancel a task |
+| `:A6sPreview` | Preview last artifacts (diff) |
+| `:A6sApply` | Apply last artifacts |
 
 ## Default keymaps
 
@@ -85,7 +85,7 @@ require("autonoma").setup({
 
 ```lua
 require("lualine").setup({
-  sections = { lualine_x = { require("autonoma.statusline").lualine_component() } }
+  sections = { lualine_x = { require("a6s.statusline").lualine_component() } }
 })
 ```
 

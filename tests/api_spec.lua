@@ -1,8 +1,8 @@
--- Tests for lua/autonoma/api.lua: frame codec, request/response, mock server
+-- Tests for lua/a6s/api.lua: frame codec, request/response, mock server
 local uv = vim.loop
 
-describe("autonoma.api frame codec", function()
-  local api = require("autonoma.api")
+describe("a6s.api frame codec", function()
+  local api = require("a6s.api")
 
   it("encodes a short text frame with mask bit set", function()
     local frame = api._encode_frame("hello")
@@ -96,7 +96,7 @@ local function start_mock_server(port, on_message)
       end
 
       -- Decode frames
-      local api = require("autonoma.api")
+      local api = require("a6s.api")
       local frames, rest = api._decode_frames(recv)
       recv = rest
       for _, f in ipairs(frames) do
@@ -128,8 +128,8 @@ local function start_mock_server(port, on_message)
   return server
 end
 
-describe("autonoma.api websocket client", function()
-  local api = require("autonoma.api")
+describe("a6s.api websocket client", function()
+  local api = require("a6s.api")
   local mock_port = 19876
   local server
 
@@ -293,8 +293,8 @@ describe("autonoma.api websocket client", function()
   end)
 end)
 
-describe("autonoma.api protocol methods not connected", function()
-  local api = require("autonoma.api")
+describe("a6s.api protocol methods not connected", function()
+  local api = require("a6s.api")
   before_each(function() api.reset_state() end)
 
   it("all methods fail gracefully when not connected", function()
