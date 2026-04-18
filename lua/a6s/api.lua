@@ -535,6 +535,64 @@ function M.review_code(code, language, file_path, review_type, cb)
 end
 
 -- ============================================================================
+-- Fleet
+-- ============================================================================
+
+--- List all agents in the fleet with their current status.
+--- @param cb function callback(result, err)
+function M.fleet_list(cb) request("fleet.list", {}, cb) end
+
+--- Get detailed status for a specific fleet agent.
+--- @param agent_id string the agent identifier
+--- @param cb function callback(result, err)
+function M.fleet_status(agent_id, cb)
+  request("fleet.status", { agentId = agent_id }, cb)
+end
+
+--- Send a control command to a fleet agent.
+--- @param agent_id string the agent identifier
+--- @param command string the command (e.g. "start", "stop", "restart")
+--- @param cb function callback(result, err)
+function M.fleet_command(agent_id, command, cb)
+  request("fleet.command", { agentId = agent_id, command = command }, cb)
+end
+
+-- ============================================================================
+-- Workflows
+-- ============================================================================
+
+--- List available workflow templates, optionally filtered by domain.
+--- @param domain string|nil optional domain filter
+--- @param cb function callback(result, err)
+function M.list_workflows(domain, cb)
+  local params = {}
+  if domain and domain ~= "" then params.domain = domain end
+  request("workflows.list", params, cb)
+end
+
+--- Run a workflow template.
+--- @param workflow_id string the workflow template identifier
+--- @param inputs table|nil optional key/value inputs for the workflow
+--- @param cb function callback(result, err)
+function M.run_workflow(workflow_id, inputs, cb)
+  request("workflows.run", { workflowId = workflow_id, inputs = inputs or vim.empty_dict() }, cb)
+end
+
+--- Get the status of a running workflow execution.
+--- @param execution_id string the workflow execution identifier
+--- @param cb function callback(result, err)
+function M.workflow_status(execution_id, cb)
+  request("workflows.status", { executionId = execution_id }, cb)
+end
+
+--- Cancel a running workflow execution.
+--- @param execution_id string the workflow execution identifier
+--- @param cb function callback(result, err)
+function M.workflow_cancel(execution_id, cb)
+  request("workflows.cancel", { executionId = execution_id }, cb)
+end
+
+-- ============================================================================
 -- Setup
 -- ============================================================================
 

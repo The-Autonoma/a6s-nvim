@@ -414,6 +414,263 @@ function M.cmd_background_output(task_id)
   end)
 end
 
+-- 25 SDLC agents across 6 capability groups (INFRA-internal agents excluded).
+local SDLC_AGENTS = {
+  -- PLAN
+  { id = "req-ai",        name = "req-ai",        group = "PLAN" },
+  { id = "architect-ai",  name = "architect-ai",  group = "PLAN" },
+  { id = "plan-ai",       name = "plan-ai",        group = "PLAN" },
+  { id = "design-ai",     name = "design-ai",      group = "PLAN" },
+  -- BUILD
+  { id = "coder-ai",      name = "coder-ai",       group = "BUILD" },
+  { id = "tester-ai",     name = "tester-ai",      group = "BUILD" },
+  { id = "reviewer-ai",   name = "reviewer-ai",    group = "BUILD" },
+  { id = "doc-ai",        name = "doc-ai",          group = "BUILD" },
+  { id = "debug-ai",      name = "debug-ai",        group = "BUILD" },
+  -- RELEASE
+  { id = "release-ai",    name = "release-ai",     group = "RELEASE" },
+  { id = "deploy-ai",     name = "deploy-ai",      group = "RELEASE" },
+  { id = "migrate-ai",    name = "migrate-ai",     group = "RELEASE" },
+  -- OPERATE
+  { id = "observe-ai",    name = "observe-ai",     group = "OPERATE" },
+  { id = "incident-ai",   name = "incident-ai",    group = "OPERATE" },
+  { id = "sre-ai",        name = "sre-ai",          group = "OPERATE" },
+  { id = "perf-ai",       name = "perf-ai",         group = "OPERATE" },
+  -- SECURE
+  { id = "security-ai",   name = "security-ai",    group = "SECURE" },
+  { id = "compliance-ai", name = "compliance-ai",  group = "SECURE" },
+  { id = "threat-ai",     name = "threat-ai",      group = "SECURE" },
+  { id = "audit-ai",      name = "audit-ai",        group = "SECURE" },
+  -- EVOLVE
+  { id = "innovate-ai",   name = "innovate-ai",    group = "EVOLVE" },
+  { id = "feedback-ai",   name = "feedback-ai",    group = "EVOLVE" },
+  { id = "learn-ai",      name = "learn-ai",        group = "EVOLVE" },
+  { id = "adapt-ai",      name = "adapt-ai",        group = "EVOLVE" },
+  { id = "optimize-ai",   name = "optimize-ai",    group = "EVOLVE" },
+}
+
+-- ---------------------------------------------------------------------------
+-- Fleet commands
+-- ---------------------------------------------------------------------------
+
+function M.cmd_fleet_list()
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
+
+  if not api.is_connected() then
+    notify.error("Not connected. Run :A6sConnect")
+    return
+  end
+
+  api.fleet_list(function(result, err)
+    if err then
+      notify.error("fleet list failed: " .. tostring(err))
+      return
+    end
+
+    local agents = result and result.agents or result or {}
+    vim.schedule(function()
+      local lines = { "# Fleet (" .. #agents .. " agents)", "" }
+      for _, agent in ipairs(agents) do
+        local id     = agent.id or agent.agentId or "?"
+        local status = agent.status or "unknown"
+        local group  = agent.group or agent.capability or ""
+        local sep    = group ~= "" and " [" .. group .. "]" or ""
+        table.insert(lines, string.format("- **%s**%s: %s", id, sep, status))
+      end
+      show_text_float("Fleet", table.concat(lines, "\n"))
+    end)
+  end)
+end
+
+function M.cmd_fleet_status(agent_id)
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
+
+  if not api.is_connected() then
+    notify.error("Not connected. Run :A6sConnect")
+    return
+  end
+
+  local function do_fleet_status(aid)
+    aid = notify.validate_input(aid, "agentId")
+    if not aid then return end
+
+    api.fleet_status(aid, function(result, err)
+      if err then
+        notify.error("fleet status failed: " .. tostring(err))
+        return
+      end
+      vim.schedule(function()
+        local status  = result and result.status  or "unknown"
+        local uptime  = result and result.uptime  or "?"
+        local version = result and result.version or "?"
+        notify.info(string.format("Fleet agent %s: status=%s uptime=%s version=%s",
+          aid, status, tostring(uptime), tostring(version)))
+      end)
+    end)
+  end
+
+  if agent_id and agent_id ~= "" then
+    do_fleet_status(agent_id)
+    return
+  end
+
+  -- Interactive: pick from known SDLC agents
+  local display = {}
+  for _, a in ipairs(SDLC_AGENTS) do
+    table.insert(display, a.id .. " [" .. a.group .. "]")
+  end
+  vim.ui.select(display, { prompt = "Fleet agent:" }, function(choice, idx)
+    if not choice or not idx then return end
+    do_fleet_status(SDLC_AGENTS[idx].id)
+  end)
+end
+
+-- ---------------------------------------------------------------------------
+-- Workflow commands
+-- ---------------------------------------------------------------------------
+
+function M.cmd_workflow_list(domain)
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
+
+  if not api.is_connected() then
+    notify.error("Not connected. Run :A6sConnect")
+    return
+  end
+
+  api.list_workflows(domain ~= "" and domain or nil, function(result, err)
+    if err then
+      notify.error("workflow list failed: " .. tostring(err))
+      return
+    end
+
+    local workflows = result and result.workflows or result or {}
+    vim.schedule(function()
+      local lines = { "# Workflows (" .. #workflows .. ")", "" }
+      for _, wf in ipairs(workflows) do
+        local id   = wf.id or "?"
+        local name = wf.name or id
+        local desc = wf.description or ""
+        table.insert(lines, string.format("- **%s** (`%s`): %s", name, id, desc))
+      end
+      show_text_float("Workflows", table.concat(lines, "\n"))
+    end)
+  end)
+end
+
+function M.cmd_workflow_run(workflow_id)
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
+
+  if not api.is_connected() then
+    notify.error("Not connected. Run :A6sConnect")
+    return
+  end
+
+  local function do_run(wid)
+    wid = notify.validate_input(wid, "workflowId")
+    if not wid then return end
+
+    api.run_workflow(wid, nil, function(result, err)
+      if err then
+        notify.error("workflow run failed: " .. tostring(err))
+        return
+      end
+      local exec_id = result and (result.executionId or result.execution_id)
+      if exec_id then
+        notify.info("Workflow started: " .. exec_id)
+        require("a6s.rigor").open(exec_id)
+      else
+        notify.info("Workflow launched")
+      end
+    end)
+  end
+
+  if workflow_id and workflow_id ~= "" then
+    do_run(workflow_id)
+    return
+  end
+
+  vim.ui.input({ prompt = "Workflow ID: " }, function(wid)
+    if not wid or wid == "" then return end
+    do_run(wid)
+  end)
+end
+
+function M.cmd_workflow_status(execution_id)
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
+
+  if not api.is_connected() then
+    notify.error("Not connected. Run :A6sConnect")
+    return
+  end
+
+  local function do_wf_status(eid)
+    eid = notify.validate_input(eid, "executionId")
+    if not eid then return end
+
+    api.workflow_status(eid, function(result, err)
+      if err then
+        notify.error("workflow status failed: " .. tostring(err))
+        return
+      end
+      vim.schedule(function()
+        local status   = result and result.status   or "unknown"
+        local phase    = result and result.phase    or "unknown"
+        local progress = result and result.progress or 0
+        notify.info(string.format("Workflow %s: status=%s phase=%s progress=%d%%",
+          eid, status, phase, progress))
+      end)
+    end)
+  end
+
+  if execution_id and execution_id ~= "" then
+    do_wf_status(execution_id)
+    return
+  end
+
+  vim.ui.input({ prompt = "Execution ID: " }, function(eid)
+    if not eid or eid == "" then return end
+    do_wf_status(eid)
+  end)
+end
+
+function M.cmd_workflow_cancel(execution_id)
+  local api = require("a6s.api")
+  local notify = require("a6s.notify")
+
+  if not api.is_connected() then
+    notify.error("Not connected. Run :A6sConnect")
+    return
+  end
+
+  local function do_cancel(eid)
+    eid = notify.validate_input(eid, "executionId")
+    if not eid then return end
+
+    api.workflow_cancel(eid, function(_, err)
+      if err then
+        notify.error("workflow cancel failed: " .. tostring(err))
+      else
+        notify.info("Workflow cancelled: " .. eid)
+      end
+    end)
+  end
+
+  if execution_id and execution_id ~= "" then
+    do_cancel(execution_id)
+    return
+  end
+
+  vim.ui.input({ prompt = "Execution ID: " }, function(eid)
+    if not eid or eid == "" then return end
+    do_cancel(eid)
+  end)
+end
+
 function M.setup()
   local cmd = vim.api.nvim_create_user_command
   cmd("A6sConnect", function() M.cmd_connect() end, { desc = "Connect to A6s daemon" })
@@ -441,6 +698,18 @@ function M.setup()
   cmd("A6sLaunch", function() M.cmd_background_launch() end, { desc = "Launch background task" })
   cmd("A6sOutput", function(opts) M.cmd_background_output(opts.args ~= "" and opts.args or nil) end,
     { desc = "Show background task output", nargs = "?" })
+  cmd("A6sFleetList", function() M.cmd_fleet_list() end,
+    { desc = "List all fleet agents and their status" })
+  cmd("A6sFleetStatus", function(opts) M.cmd_fleet_status(opts.args ~= "" and opts.args or nil) end,
+    { desc = "Show status of a fleet agent", nargs = "?" })
+  cmd("A6sWorkflowList", function(opts) M.cmd_workflow_list(opts.args) end,
+    { desc = "List workflow templates", nargs = "?" })
+  cmd("A6sWorkflowRun", function(opts) M.cmd_workflow_run(opts.args ~= "" and opts.args or nil) end,
+    { desc = "Run a workflow template", nargs = "?" })
+  cmd("A6sWorkflowStatus", function(opts) M.cmd_workflow_status(opts.args ~= "" and opts.args or nil) end,
+    { desc = "Show status of a workflow execution", nargs = "?" })
+  cmd("A6sWorkflowCancel", function(opts) M.cmd_workflow_cancel(opts.args ~= "" and opts.args or nil) end,
+    { desc = "Cancel a workflow execution", nargs = "?" })
 end
 
 -- Expose helpers for testing
