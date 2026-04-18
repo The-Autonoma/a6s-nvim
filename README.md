@@ -17,7 +17,7 @@ Official Neovim client for **A6s** -- Intelligent Multi-Agent Orchestration. Con
 **lazy.nvim**
 ```lua
 {
-  "autonoma/a6s.nvim",
+  "The-Autonoma/a6s-nvim",
   dependencies = { "nvim-telescope/telescope.nvim" },
   opts = { telemetry_enabled = false },
 }
@@ -26,7 +26,7 @@ Official Neovim client for **A6s** -- Intelligent Multi-Agent Orchestration. Con
 **packer.nvim**
 ```lua
 use {
-  "autonoma/a6s.nvim",
+  "The-Autonoma/a6s-nvim",
   requires = { "nvim-telescope/telescope.nvim" },
   config = function() require("a6s").setup({ telemetry_enabled = false }) end,
 }
@@ -35,7 +35,7 @@ use {
 **vim-plug**
 ```vim
 Plug 'nvim-telescope/telescope.nvim'
-Plug 'autonoma/a6s.nvim'
+Plug 'The-Autonoma/a6s-nvim'
 lua require('a6s').setup({ telemetry_enabled = false })
 ```
 

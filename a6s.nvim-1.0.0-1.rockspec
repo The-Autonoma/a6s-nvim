@@ -15,7 +15,7 @@ description = {
     artifacts, and manage background tasks. Pure Lua, Neovim 0.9+.
   ]],
   homepage = "https://github.com/The-Autonoma/a6s-nvim",
-  license = "MIT",
+  license = "Apache-2.0",
   labels = { "neovim", "ai", "a6s", "websocket" },
 }
 
